@@ -3,7 +3,7 @@ from flask_restful import Resource
 
 class UserRegisterREST(Resource):
 
-    def get(self, username, user_mail, pwd_hash):
+    def put(self, username, user_mail, pwd_hash):
         return {}
 
 
