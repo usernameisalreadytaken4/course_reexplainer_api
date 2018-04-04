@@ -6,9 +6,11 @@ from models.regex import Regex
 
 class Ratings(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user = db.Column(db.ForeignKey(User.id), nullable=False)
-    post = db.Column(db.ForeignKey(Regex.id), nullable=False)
-    mark = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.ForeignKey(User.id), nullable=False)
+    user = db.relationship('User', backref=db.backref('rates', lazy=True))
+    regex_id = db.Column(db.ForeignKey(Regex.id), nullable=False)
+    regex = db.relationship('Regex', backref=db.backref('expressions', lazy=True))
+    mark = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return f'<Ratings {self.id}:{self.mark}>'

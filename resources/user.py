@@ -1,9 +1,8 @@
 from os import urandom
 from binascii import hexlify
 from hashlib import sha512
-from datetime import timedelta
 
-from flask_restful import Resource, marshal_with, fields
+from flask_restful import Resource
 
 from models.user import User
 from common.util import RedisDict
@@ -11,6 +10,17 @@ from app import db
 
 
 r = RedisDict()
+
+
+class UserREST(Resource):
+
+    def get(self, username):
+        if len(username) > 60:
+            return {'error': 'too_long_username'}
+        user = User.query.filter_by(username=username).first()
+        if user:
+            return {'user': username}
+        return {'error': 'no_user'}
 
 
 class UserRegisterREST(Resource):
@@ -38,19 +48,8 @@ class UserAuthorizationREST(Resource):
         if pwd == pwd_hash:
             token = sha512(f'{user.username}:{hexlify(urandom(16)).decode()}'.encode()).hexdigest()
             r[token] = user.username
-            r.expire(token, int(timedelta(days=3).total_seconds()))
+            r.expire(token, 259200)
             return {'token': token}
-
-
-class UserREST(Resource):
-
-    def get(self, username):
-        if len(username) > 60:
-            return {'error': 'too_long_username'}
-        user = User.query.filter_by(username=username).first()
-        if user:
-            return {'user': username}
-        return {'error': 'no_user'}
 
 
 class UserTokenAuthorizeREST(Resource):
@@ -60,6 +59,6 @@ class UserTokenAuthorizeREST(Resource):
             username = r[token]
             token = sha512(f'{username}:{hexlify(urandom(16)).decode()}'.encode()).hexdigest()
             r[token] = username
-            r.expire(token, int(timedelta(days=3).total_seconds()))
+            r.expire(token, 259200)
             return {'token': token}
         return {'error': 'is_not_authorized'}
