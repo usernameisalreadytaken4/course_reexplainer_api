@@ -34,14 +34,12 @@ class UserAuthorizationREST(Resource):
         user = User.query.filter_by(username=username).first()
         if not user:
             return {'error': 'no_user'}
-        else:
-            pwd = sha512(f'{user.password}:{salt}'.encode()).hexdigest()
-            if pwd == pwd_hash:
-                token_salt = hexlify(urandom(16)).decode()
-                token = sha512(f'{user.username}:{token_salt}'.encode()).hexdigest()
-                r[token] = user.username
-                r.expire(token, int(timedelta(days=3).total_seconds()))
-                return {'token': token}
+        pwd = sha512(f'{user.password}:{salt}'.encode()).hexdigest()
+        if pwd == pwd_hash:
+            token = sha512(f'{user.username}:{hexlify(urandom(16)).decode()}'.encode()).hexdigest()
+            r[token] = user.username
+            r.expire(token, int(timedelta(days=3).total_seconds()))
+            return {'token': token}
 
 
 class UserREST(Resource):
@@ -52,14 +50,16 @@ class UserREST(Resource):
         user = User.query.filter_by(username=username).first()
         if user:
             return {'user': username}
-        else:
-            return {'error': 'no_user'}
+        return {'error': 'no_user'}
 
 
 class UserTokenAuthorizeREST(Resource):
 
     def post(self, token):
         if token in r:
-            user = r[token]
-
-        # TODO: CHECK IF TOKEN IN REDIS
+            username = r[token]
+            token = sha512(f'{username}:{hexlify(urandom(16)).decode()}'.encode()).hexdigest()
+            r[token] = username
+            r.expire(token, int(timedelta(days=3).total_seconds()))
+            return {'token': token}
+        return {'error': 'is_not_authorized'}
