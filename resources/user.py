@@ -1,9 +1,16 @@
+from os import urandom
+from binascii import hexlify
 from hashlib import sha512
+from datetime import timedelta
 
 from flask_restful import Resource, marshal_with, fields
 
 from models.user import User
+from common.util import RedisDict
 from app import db
+
+
+r = RedisDict()
 
 
 class UserRegisterREST(Resource):
@@ -30,9 +37,11 @@ class UserAuthorizationREST(Resource):
         else:
             pwd = sha512(f'{user.password}:{salt}'.encode()).hexdigest()
             if pwd == pwd_hash:
-                pass
-                # TODO: GENERATE USER TOKENS AND SAVE THEM IN REDIS
-        return {}
+                token_salt = hexlify(urandom(16)).decode()
+                token = sha512(f'{user.username}:{token_salt}'.encode()).hexdigest()
+                r[token] = user.username
+                r.expire(token, int(timedelta(days=3).total_seconds()))
+                return {'token': token}
 
 
 class UserREST(Resource):
@@ -45,3 +54,12 @@ class UserREST(Resource):
             return {'user': username}
         else:
             return {'error': 'no_user'}
+
+
+class UserTokenAuthorizeREST(Resource):
+
+    def post(self, token):
+        if token in r:
+            user = r[token]
+
+        # TODO: CHECK IF TOKEN IN REDIS
