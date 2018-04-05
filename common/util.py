@@ -16,7 +16,7 @@ class RedisDict:
         return self.__db.get(key).decode()
 
     def __contains__(self, item):
-        return True if self[item] else False
+        return item in map(bytes.decode, self.__db.keys())
 
     def expire(self, key, time):
         self.__db.expire(key, time)
