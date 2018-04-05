@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from app import db
+from models.base import db
 
 from .user import User
 
