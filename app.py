@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import Api
-from resources.user import UserREST, UserRegisterREST, UserAuthorizationREST, UserTokenAuthorizeREST
+from resources import UserREST, UserRegisterREST, UserAuthorizationREST, UserTokenAuthorizeREST
 
 from config import config
 
