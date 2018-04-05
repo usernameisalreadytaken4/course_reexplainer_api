@@ -1,3 +1,4 @@
+import re
 from os import urandom
 from binascii import hexlify
 from hashlib import sha512
@@ -10,15 +11,15 @@ from common.util import RedisDict
 
 
 r = RedisDict()
+mail_validator = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 
 
 class UserREST(Resource):
 
     def get(self, username):
         if len(username) > 60:
-            return {'error': 'too_long_username'}, 400
-        user = User.query.filter_by(username=username).first()
-        if user:
+            return {'error': 'invalid_username'}, 400
+        if User.query.filter_by(username=username).first():
             return {'user': username}, 200
         return {'error': 'no_user'}, 400
 
@@ -27,9 +28,9 @@ class UserRegisterREST(Resource):
 
     def put(self, username, user_mail, pwd_hash):
         if len(username) > 60:
-            return {'error': 'too_long_username'}, 400
-        if len(user_mail) > 140:
-            return {'error': 'too_long_email'}, 400
+            return {'error': 'invalid_username'}, 400
+        if len(user_mail) > 140 or not mail_validator.match(user_mail):
+            return {'error': 'invalid_email'}, 400
         if User.query.filter_by(username=username).first():
             return {'error': 'user_already_exists'}, 400
         if User.query.filter_by(email=user_mail).first():
