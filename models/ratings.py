@@ -9,7 +9,6 @@ class Ratings(db.Model):
     user_id = db.Column(db.ForeignKey(User.id), nullable=False)
     user = db.relationship('User', backref=db.backref('rates', lazy=True))
     regex_id = db.Column(db.ForeignKey(Regex.id), nullable=False)
-    regex = db.relationship('Regex', backref=db.backref('expressions', lazy=True))
     mark = db.Column(db.Integer, default=0)
 
     def __repr__(self):

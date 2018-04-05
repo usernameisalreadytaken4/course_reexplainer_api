@@ -21,20 +21,20 @@ from resources.user import UserREST, UserRegisterREST, UserAuthorizationREST, Us
 
 api.add_resource(
     UserREST,
-    '/users/username=<string:username>'
+    '/users/?username=<string:username>'
 )
 api.add_resource(
     UserRegisterREST,
-    '/users/register/username=<string:username>?mail=<string:user_mail>?pwd=<string:pwd_hash>'
+    '/users/register/?username=<string:username>&mail=<string:user_mail>&pwd=<string:pwd_hash>'
 )
 api.add_resource(
     UserAuthorizationREST,
-    '/users/authorize/username=<string:username>?pwd=<string:pwd_hash>?s=<string:salt>'
+    '/users/authorize/?username=<string:username>&pwd=<string:pwd_hash>&s=<string:salt>'
 )
 
 api.add_resource(
     UserTokenAuthorizeREST,
-    '/users/authorize/token=<string:token>'
+    '/users/authorize/?token=<string:token>'
 )
 
 
